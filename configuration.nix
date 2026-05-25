@@ -1,16 +1,22 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports = [
-      <home-manager/nixos>
-      ./hardware-configuration.nix
-    ];
+    <home-manager/nixos>
+    ./hardware-configuration.nix
+  ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes"];
+  services.udev.extraRules = ''
+    ACTION=="add|change", SUBSYSTEM=="input", ATTRS{name}=="AT Translated Set 2 keyboard", ENV{LIBINPUT_IGNORE_DEVICE}="1"
+  '';
 
-  nix.gc.automatic = true;
-  nix.gc.dates = "monthly";
-  nix.gc.options = "--delete-older-than 60d";
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  nix.gc = {
+    automatic = true;
+    dates = "monthly";
+    options = "--delete-older-than 60d";
+  };
 
   hardware.graphics.enable = true;
 
@@ -21,21 +27,16 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "computr";
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   networking.networkmanager.enable = true;
 
   time.timeZone = "Europe/Paris";
-
   i18n.defaultLocale = "fr_FR.UTF-8";
 
   services.xserver.enable = true;
   services.displayManager.sddm.enable = true;
   services.desktopManager.plasma6.enable = true;
 
-  services.xserver.xkb = {
-    layout = "fr";
-    variant = "";
-  };
+  services.xserver.xkb.layout = "fr";
 
   services.printing.enable = true;
 
@@ -44,61 +45,15 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
-    #jack.enable = true;
   };
 
   users.users.me = {
     isNormalUser = true;
     description = "me";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [
-    ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
   };
 
   programs.firefox.enable = true;
-
-  virtualisation.docker.enable = true;
-
-  nixpkgs.config.allowUnfree = true;
-  environment.systemPackages = with pkgs; [
-    git
-    neovim xclip
-    zoxide
-    btop
-    wget
-    tree
-    file
-    zsh
-    zip unzip
-    gcc
-    gnumake
-    cargo
-    python3
-    jdk
-    neofetch
-    libreoffice
-    librewolf
-    gimp
-    kdePackages.kdenlive
-    vscodium
-    qbittorrent
-    telegram-desktop
-    vlc
-    obs-studio
-    protonvpn-gui
-    openvpn
-    element-desktop
-    todo
-    yt-dlp scdl
-    ffmpeg
-    nmap
-    xdotool
-    vmpk
-    obsidian
-    burpsuite ffuf
-    wireshark
-  ];
-
   programs.zsh.enable = true;
 
   programs.git = {
@@ -106,9 +61,38 @@
     lfs.enable = true;
   };
 
+  virtualisation.docker.enable = true;
+  programs.steam.enable = true;
+
+  nixpkgs.config.allowUnfree = true;
+
+  environment.systemPackages = with pkgs; [
+    git
+    neovim xclip
+    zoxide btop wget tree file
+    zsh
+    zip unzip
+    gcc gnumake cargo python3
+    jdk25_headless
+    neofetch
+    libreoffice
+    librewolf
+    gimp
+    kdePackages.kdenlive
+    vscodium qbittorrent
+    telegram-desktop signal-desktop
+    vlc obs-studio
+    protonvpn-gui
+    todo yt-dlp scdl ffmpeg xdotool vmpk
+    obsidian
+    burpsuite ffuf wireshark wpscan sqlmap nmap
+    pandoc
+    tradingview
+  ];
+
   home-manager.backupFileExtension = "backup";
 
-  home-manager.users.me = { pkgs, ... }: {
+  home-manager.users.me = { config, pkgs, ... }: {
     home.stateVersion = "25.11";
 
     programs = {
@@ -119,12 +103,7 @@
         oh-my-zsh = {
           enable = true;
           theme = "robbyrussell";
-          plugins = [
-            "git"
-            "npm"
-            "history"
-            "rust"
-          ];
+          plugins = [ "git" "npm" "history" "rust" ];
         };
       };
 
@@ -134,14 +113,17 @@
         viAlias = true;
         vimAlias = true;
         extraConfig = ''
-            set number relativenumber
-            set autoindent
-            set list
-            set clipboard+=unnamedplus
-            if &diff
-              colorscheme blue
-            endif
-          '';
+          set number relativenumber
+          set autoindent
+          set tabstop=4
+          set shiftwidth=4
+          set expandtab
+          set list
+          set clipboard+=unnamedplus
+          if &diff
+            colorscheme blue
+          endif
+        '';
       };
 
       zoxide.enable = true;
