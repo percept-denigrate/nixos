@@ -74,7 +74,6 @@
     zip unzip
     gcc gnumake cargo python3
     jdk25_headless
-    neofetch
     libreoffice
     librewolf
     gimp
@@ -87,13 +86,13 @@
     obsidian
     burpsuite ffuf wireshark wpscan sqlmap nmap
     pandoc
-    tradingview
+    keepass
   ];
 
   home-manager.backupFileExtension = "backup";
 
   home-manager.users.me = { config, pkgs, ... }: {
-    home.stateVersion = "25.11";
+    home.stateVersion = "26.05";
 
     programs = {
       zsh = {
@@ -140,5 +139,5 @@
     magicOrExtension = ''\x7fELF....AI\x02'';
   };
 
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.05";
 }
