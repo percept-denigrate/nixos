@@ -6,10 +6,6 @@
     ./hardware-configuration.nix
   ];
 
-  services.udev.extraRules = ''
-    ACTION=="add|change", SUBSYSTEM=="input", ATTRS{name}=="AT Translated Set 2 keyboard", ENV{LIBINPUT_IGNORE_DEVICE}="1"
-  '';
-
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   nix.gc = {
@@ -21,7 +17,18 @@
   hardware.graphics.enable = true;
 
   hardware.bluetooth.enable = true;
+  hardware.bluetooth.settings = {
+    General = {
+      Enable = "Source,Sink,Media,Socket";
+    };
+  };
   services.blueman.enable = true;
+  services.pipewire.wireplumber.extraConfig."51-bluez-config" = {
+  "monitor.bluez.properties" = {
+    "bluez5.roles" = [ "a2dp_sink" "a2dp_source" "bap_sink" "bap_source" "hsp_hs" "hsp_ag" "hfp_hf" "hfp_ag" ];
+    "bluetooth.autoswitch-to-headset-profile" = false;
+  };
+};
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -30,7 +37,12 @@
   networking.networkmanager.enable = true;
 
   time.timeZone = "Europe/Paris";
-  i18n.defaultLocale = "fr_FR.UTF-8";
+  i18n = {
+    defaultLocale = "fr_FR.UTF-8";
+    extraLocaleSettings = {
+      LC_TIME = "fr_FR.UTF-8";
+    };
+  };
 
   services.xserver.enable = true;
   services.displayManager.sddm.enable = true;
@@ -78,11 +90,13 @@
     librewolf
     gimp
     kdePackages.kdenlive
-    vscodium qbittorrent
+    vscodium
+    qbittorrent
     telegram-desktop signal-desktop
-    vlc obs-studio
-    protonvpn-gui
-    todo yt-dlp scdl ffmpeg xdotool vmpk
+    vlc
+    obs-studio
+    yt-dlp scdl ffmpeg xdotool
+    vmpk
     obsidian
     burpsuite ffuf wireshark wpscan sqlmap nmap
     pandoc
